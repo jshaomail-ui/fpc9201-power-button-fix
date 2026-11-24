@@ -1,0 +1,10 @@
+[Unit]
+Description=Keep EC out of deep sleep so power button wakes from s2idle
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo 1 > /sys/module/acpi_x86/parameters/sleep_no_lps0'
+
+[Install]
+WantedBy=multi-user.target

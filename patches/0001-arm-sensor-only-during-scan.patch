@@ -1,0 +1,21 @@
+--- a/src/drv_fpc/fpc9201.cpp
++++ b/src/drv_fpc/fpc9201.cpp
+@@ -2264,10 +2264,14 @@
+     Async end_session() {
+         // get dead pixel
+         libusb_fill_control_setup( _control_buffer, CTRL_HOST_TO_DEVICE, cmd_fingerprint_sesson_off, 0x0000, 0x0000, 0);
+-        
+-        return *this 
+-            / _control_transfer(_handle, _control_buffer, std::chrono::seconds(10)) 
+-            / &WorkerControl::start_sensor;
++
++        // Do not immediately re-arm the sensor. Keeping it armed continuously
++        // suppresses the EC power-button signal on laptops where the reader is
++        // integrated into the power key. Arm only when a scan actually starts
++        // (FPP_StartSensor), then go back to sleep when the scan stops.
++        return *this
++            / _control_transfer(_handle, _control_buffer, std::chrono::seconds(10))
++            / &WorkerControl::get_event;
+     }
+     
+     Async get_kpi() {
